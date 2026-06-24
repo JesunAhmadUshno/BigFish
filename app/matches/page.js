@@ -5,6 +5,8 @@ import { TEAM_ELO } from '../../lib/constants';
 import { predictMatch } from '../../lib/dixon-coles';
 import { getTeamSentiment } from '../../lib/sentiment-agent';
 
+import Link from 'next/link';
+
 export default function MatchesPage() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -99,9 +101,9 @@ export default function MatchesPage() {
                 🏟️ Stadium ID: {match.stadium_id}
               </div>
 
-              <a href={`/predictions?matchId=${match.id}`} className="btn" style={{ width: '100%', textAlign: 'center', display: 'block', background: 'rgba(0,255,204,0.1)', color: 'var(--accent-teal)' }}>
+              <Link href={`/predictions?matchId=${match.id}`} className="btn" style={{ width: '100%', textAlign: 'center', display: 'block', background: 'rgba(0,255,204,0.1)', color: 'var(--accent-teal)' }}>
                 🧠 LOAD AI MARKET
-              </a>
+              </Link>
             </div>
           )
         })}

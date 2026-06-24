@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import './globals.css'
 
 export const metadata = {
@@ -6,6 +7,8 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
   return (
     <html lang="en">
       <body>
@@ -23,20 +26,20 @@ export default function RootLayout({ children }) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {/* The Logo */}
-            <img src="/assets/bigfish_logo.png" alt="BigFish Logo" style={{ height: '48px', width: 'auto', borderRadius: '8px' }} />
+            <img src={`${basePath}/assets/bigfish_logo.png`} alt="BigFish Logo" style={{ height: '48px', width: 'auto', borderRadius: '8px' }} />
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 800, color: '#fff', letterSpacing: '1px' }}>
               Big<span style={{ color: 'var(--accent-teal)' }}>Fish</span>
             </span>
           </div>
           <div className="nav-links" style={{ display: 'flex', gap: '20px', fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 600, letterSpacing: '1px' }}>
-            <a href="/matches" style={{ color: 'var(--accent-gold)', textDecoration: 'none' }}>WORLD CUP HUB</a>
-            <a href="/predictions" style={{ color: 'var(--accent-teal)', textDecoration: 'none' }}>LIVE MARKETS</a>
-            <a href="/agents" style={{ color: 'var(--accent-purple)', textDecoration: 'none' }}>AI AGENTS</a>
+            <Link href="/matches" style={{ color: 'var(--accent-gold)', textDecoration: 'none' }}>WORLD CUP HUB</Link>
+            <Link href="/predictions" style={{ color: 'var(--accent-teal)', textDecoration: 'none' }}>LIVE MARKETS</Link>
+            <Link href="/agents" style={{ color: 'var(--accent-purple)', textDecoration: 'none' }}>AI AGENTS</Link>
           </div>
         </nav>
         
         {/* The Hero Banner */}
-        <div className="hero-banner">
+        <div className="hero-banner" style={{ backgroundImage: `url('${basePath}/assets/hero_banner.png')` }}>
           <div className="hero-content">
             <h1 className="hero-title">FIFA World Cup 2026</h1>
             <div className="hero-subtitle">Autonomous Betting Predictive AI</div>
