@@ -9,7 +9,7 @@
 
 **BigFish** is a fully autonomous, premium sports betting predictive terminal. It leverages a multi-agent AI architecture to continuously fetch live global football data, execute mathematical Poisson distributions, parse news sentiment, and calculate Expected Value (+EV) to find profitable edges against global sportsbooks.
 
-**🌐 Live Demo:** [https://YOUR_GITHUB_USERNAME.github.io/BigFish](https://YOUR_GITHUB_USERNAME.github.io/BigFish) *(Replace with your live link once pushed!)*
+**🌐 Live Demo:** [https://JesunAhmadUshno.github.io/BigFish](https://JesunAhmadUshno.github.io/BigFish)
 
 ---
 
