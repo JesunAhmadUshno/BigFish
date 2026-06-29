@@ -1,5 +1,10 @@
 # 🦈 BigFish: God-Level Quantitative Sports Betting Terminal
 
+![GitHub Repo stars](https://img.shields.io/github/stars/JesunAhmadUshno/BigFish?style=for-the-badge&color=00ffcc)
+![GitHub forks](https://img.shields.io/github/forks/JesunAhmadUshno/BigFish?style=for-the-badge&color=ff3366)
+![License](https://img.shields.io/github/license/JesunAhmadUshno/BigFish?style=for-the-badge&color=9d4edd)
+![Build Status](https://img.shields.io/github/actions/workflow/status/JesunAhmadUshno/BigFish/nextjs.yml?style=for-the-badge)
+
 Welcome to **BigFish**, an institutional-grade, fully autonomous quantitative sports betting terminal built for the 2026 FIFA World Cup and global live soccer markets. 
 
 This is not a traditional spreadsheet or a simple odds scraper. BigFish is a Web3-enabled Hedge Fund Terminal powered by deep learning, cognitive agent swarms, and live in-play data loops.
@@ -11,6 +16,19 @@ This is not a traditional spreadsheet or a simple odds scraper. BigFish is a Web
 ## 🧠 The V11.0 Neural Swarm Architecture
 
 BigFish has evolved into a "God-Level" autonomous trading ecosystem. Here is how the engine works:
+
+```mermaid
+graph TD
+    A[Live API-Sports Data Feed] -->|Possession, Red Cards| B(Swarm Orchestrator)
+    C[News/Twitter NLP Scraper] -->|Sentiment Analysis| B
+    B -->|Generates Feature Tensor| D{TensorFlow.js Deep Learning}
+    D -->|Probability Distribution| E[Neural Heatmap & EV Calculator]
+    E -->|If EV > 0| F((Web3 Execution Agent))
+    F -.->|Sign Tx via MetaMask| G[Polymarket / Azuro Dex]
+    
+    H[(IndexedDB Local Memory)] -.->|Trained Weights| D
+    I[Quant Backtester] -->|Trains via model.fit| H
+```
 
 ### 1. The Deep Learning Engine (TensorFlow.js)
 At the core of BigFish is a non-linear Sequential Neural Network running directly in the browser via `@tensorflow/tfjs`.
