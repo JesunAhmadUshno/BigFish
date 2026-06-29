@@ -2,43 +2,61 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import EasyInterpreter from '../components/EasyInterpreter';
-import LiveSimulator from '../components/LiveSimulator';
+import RealMatchTracker from '../components/RealMatchTracker';
 import { getPolymarketOdds } from '../../lib/polymarket';
+import { MatchStatisticsWidget, MatchLineupWidget } from '../components/ApiWidgets';
 import { getTeamLineup, calculatePlayerGoalProb } from '../../lib/player-data';
 import { calculateTeamTotals, predictMatch } from '../../lib/dixon-coles';
 import { getTeamSentiment } from '../../lib/sentiment-agent';
 import { TEAM_ELO } from '../../lib/constants';
+import { fetchAndUpdateElo } from '../../lib/elo-updater';
+import { Agent } from '../../lib/execution-agent';
+import NeuralHeatmap from '../components/NeuralHeatmap';
+import PlayerRadar from '../components/PlayerRadar';
+import { predictWithDeepLearning } from '../../lib/neural-engine';
+import { Orchestrator } from '../../lib/swarm-orchestrator';
 
 // ─── Constants ──────────────────────────────────────────
 const ODDS_API_KEY = 'be0f7c5a5d221ed93cad247719623ffa';
 
-// ─── Scoreline Probability Heatmap ──────────────────────
+// ─── Scoreline Probability Heatmap (Dixon-Coles Corrected) ──────
 function ScorelineHeatmap({ lambda, mu, rho }) {
   const maxGoals = 6;
   const matrix = [];
   let maxP = 0;
-  
+
+  // Use proper Dixon-Coles τ-corrected joint probabilities
+  function poissonPMF(k, lam) {
+    if (lam <= 0) return k === 0 ? 1 : 0;
+    let logP = -lam + k * Math.log(lam);
+    for (let i = 2; i <= k; i++) logP -= Math.log(i);
+    return Math.exp(logP);
+  }
+
+  function tauCorrection(x, y, lam, m, r) {
+    if (x === 0 && y === 0) return 1 - lam * m * r;
+    if (x === 0 && y === 1) return 1 + lam * r;
+    if (x === 1 && y === 0) return 1 + m * r;
+    if (x === 1 && y === 1) return 1 - r;
+    return 1.0;
+  }
+
   for (let i = 0; i <= maxGoals; i++) {
     matrix[i] = [];
     for (let j = 0; j <= maxGoals; j++) {
-      let p = 1; // Simplified for rendering speed in V5
-      if (lambda > 0 && mu > 0) {
-        // Simple independent poisson for rapid UI rendering
-        const pHome = (Math.pow(lambda, i) * Math.exp(-lambda)) / (i === 0 ? 1 : Array.from({length: i}, (_, k) => k + 1).reduce((a,b)=>a*b,1));
-        const pAway = (Math.pow(mu, j) * Math.exp(-mu)) / (j === 0 ? 1 : Array.from({length: j}, (_, k) => k + 1).reduce((a,b)=>a*b,1));
-        p = pHome * pAway;
-      }
-      matrix[i][j] = p;
+      const tau = tauCorrection(i, j, lambda, mu, rho);
+      const p = tau * poissonPMF(i, lambda) * poissonPMF(j, mu);
+      matrix[i][j] = Math.max(0, p);
       if (p > maxP) maxP = p;
     }
   }
 
   function getColor(p) {
     const intensity = p / (maxP || 1);
-    if (intensity > 0.8) return 'rgba(0, 255, 204, 0.7)'; // Accent Teal
-    if (intensity > 0.5) return 'rgba(0, 250, 154, 0.5)'; // Accent Green
-    if (intensity > 0.3) return 'rgba(255, 215, 0, 0.4)'; // Accent Gold
-    if (intensity > 0.1) return 'rgba(157, 78, 221, 0.2)'; // Accent Purple
+    if (intensity > 0.8) return 'rgba(0, 255, 204, 0.7)';
+    if (intensity > 0.5) return 'rgba(0, 250, 154, 0.5)';
+    if (intensity > 0.3) return 'rgba(255, 215, 0, 0.4)';
+    if (intensity > 0.1) return 'rgba(157, 78, 221, 0.2)';
     return 'rgba(255, 255, 255, 0.02)';
   }
 
@@ -102,12 +120,23 @@ export default function PredictionsPage() {
   const [kellyMode, setKellyMode] = useState(0.25);
   const [bankroll, setBankroll] = useState(5000);
   const [sgpLegs, setSgpLegs] = useState([]);
+  const [autoPilot, setAutoPilot] = useState(false);
+  const [neuralData, setNeuralData] = useState(null);
+  const [swarmLogs, setSwarmLogs] = useState([]);
 
   // Autonomous Data Fetching (Client Side for GitHub Pages)
   useEffect(() => {
     async function fetchLiveData() {
       try {
         let allMatches = [];
+
+        // 0. Fetch dynamic Elo ratings (auto-updates based on WC results)
+        let liveElo = { ...TEAM_ELO };
+        try {
+          const eloResult = await fetchAndUpdateElo();
+          liveElo = eloResult.elo;
+          console.log(`[BigFish] Dynamic Elo: ${eloResult.gamesProcessed} matches processed`);
+        } catch(e) { console.warn("Elo update failed, using base ratings"); }
 
         // 1. Fetch FIFA World Cup 2026 matches from public free API
         try {
@@ -131,8 +160,8 @@ export default function PredictionsPage() {
               const homeTeam = game.home_team_name_en || game.home_team_label || 'Unknown';
               const awayTeam = game.away_team_name_en || game.away_team_label || 'Unknown';
               const prediction = predictMatch({
-                homeElo: TEAM_ELO[homeTeam] || 1750,
-                awayElo: TEAM_ELO[awayTeam] || 1750,
+                homeElo: liveElo[homeTeam] || 1750,
+                awayElo: liveElo[awayTeam] || 1750,
               });
               const vig = 0.05;
               return {
@@ -186,6 +215,39 @@ export default function PredictionsPage() {
           }
         } catch(e) { console.warn("Odds API failed", e); }
 
+        // 3. Fetch REAL Live Matches from API-Sports for the Live Tracker Widget
+        try {
+          const apiSportsRes = await fetch('https://v3.football.api-sports.io/fixtures?live=all', {
+            headers: { 'x-apisports-key': '271556db4a4d80ed481770f150fe82a9' }
+          });
+          if (apiSportsRes.ok) {
+            const apiSportsData = await apiSportsRes.json();
+            const realLiveGames = apiSportsData.response.slice(0, 5).map(game => {
+              const homeTeam = game.teams.home.name;
+              const awayTeam = game.teams.away.name;
+              
+              const prediction = predictMatch({
+                homeElo: TEAM_ELO[homeTeam] || 1600,
+                awayElo: TEAM_ELO[awayTeam] || 1600,
+              });
+
+              return {
+                id: `real_${game.fixture.id}`,
+                fixtureId: game.fixture.id, // Store real fixture ID for the widget
+                tournament: `${game.league.name} (LIVE)`,
+                home: homeTeam, away: awayTeam,
+                lambda: prediction.parameters.lambda, mu: prediction.parameters.mu, rho: prediction.parameters.rho,
+                odds: { home: 1/(prediction.probabilities1X2.home + 0.05), draw: 1/(prediction.probabilities1X2.draw + 0.05), away: 1/(prediction.probabilities1X2.away + 0.05) },
+                model1X2: prediction.probabilities1X2,
+                book1X2: { home: prediction.probabilities1X2.home + 0.05, draw: prediction.probabilities1X2.draw + 0.05, away: prediction.probabilities1X2.away + 0.05 },
+                overUnder: prediction.overUnder, btts: prediction.btts
+              };
+            });
+            // Prepend real matches so they show up first
+            allMatches = [...realLiveGames, ...allMatches];
+          }
+        } catch(e) { console.warn("API-Sports failed", e); }
+
         setMatches(allMatches);
         setLoading(false);
       } catch (error) {
@@ -202,6 +264,57 @@ export default function PredictionsPage() {
   // Players and Team Totals
   const homeLineup = match ? getTeamLineup(match.home) : [];
   const awayLineup = match ? getTeamLineup(match.away) : [];
+  
+  // Trigger Neural Engine on Match Selection (and poll live stats)
+  useEffect(() => {
+    let intervalId;
+
+    async function runNeuralSwarm() {
+      if (!match) return;
+      if (!neuralData) setNeuralData(null); // Reset only on initial load
+      
+      try {
+        let liveMatchData = null;
+
+        // If it's a real live match, fetch live stats to dynamically update the AI
+        if (match.id.startsWith('real_')) {
+           try {
+             const statsRes = await fetch(`https://v3.football.api-sports.io/fixtures/statistics?fixture=${match.fixtureId}`, {
+               headers: { 'x-apisports-key': '271556db4a4d80ed481770f150fe82a9' }
+             });
+             if (statsRes.ok) {
+               const data = await statsRes.json();
+               if (data.response && data.response.length > 0) {
+                 liveMatchData = { statistics: data.response };
+               }
+             }
+           } catch (err) { console.warn("Live stats fetch failed", err); }
+        }
+
+        // 1. Swarm Orchestrator gathers tactical/sentiment features AND live stats
+        const features = await Orchestrator.orchestrateFeatures(
+          { home: match.home, away: match.away, homeElo: TEAM_ELO[match.home], awayElo: TEAM_ELO[match.away], baseHomeXG: match.lambda, baseAwayXG: match.mu },
+          { restDays: 4 }, { restDays: 4 }, liveMatchData
+        );
+        
+        setSwarmLogs(features.swarmLogs);
+
+        // 2. Deep Learning Engine calculates probability
+        const prediction = await predictWithDeepLearning(features);
+        setNeuralData(prediction);
+      } catch (e) { console.error("Neural Engine Failed", e); }
+    }
+    
+    runNeuralSwarm();
+
+    // Set up continuous polling for live matches (every 30 seconds)
+    if (match && match.id.startsWith('real_')) {
+      intervalId = setInterval(runNeuralSwarm, 30000);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [match]);
+
   const teamTotals = match ? {
     home: calculateTeamTotals(match.lambda),
     away: calculateTeamTotals(match.mu)
@@ -259,6 +372,58 @@ export default function PredictionsPage() {
 
   return (
     <>
+      {/* Global Controls & Bankroll */}
+      <div className="card animate-in animate-in-delay-1" style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.4)', padding: '16px 24px', borderRadius: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div>
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>CURRENT BANKROLL</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--accent-green)', fontFamily: 'var(--font-mono)', fontSize: '1.2rem' }}>$</span>
+              <input 
+                type="number" 
+                value={bankroll} 
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setBankroll(val);
+                  Agent.setBankroll(val);
+                }}
+                className="input" 
+                style={{ width: '120px', fontFamily: 'var(--font-mono)', fontSize: '1.2rem', padding: '4px 8px' }} 
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Auto-Pilot Execution</div>
+            <div style={{ fontSize: '0.65rem', color: autoPilot ? 'var(--accent-red)' : 'var(--text-secondary)' }}>
+              {autoPilot ? '⚠️ LIVE MONEY AT RISK' : 'Manual Mode'}
+            </div>
+          </div>
+          <button 
+            onClick={() => {
+              const newState = !autoPilot;
+              setAutoPilot(newState);
+              Agent.toggleAutoPilot(newState);
+            }}
+            style={{
+              width: '60px', height: '32px', borderRadius: '16px',
+              background: autoPilot ? 'rgba(255,51,102,0.2)' : 'rgba(255,255,255,0.1)',
+              border: `2px solid ${autoPilot ? 'var(--accent-red)' : 'var(--border-subtle)'}`,
+              position: 'relative', cursor: 'pointer', transition: 'all 0.3s'
+            }}
+          >
+            <div style={{
+              position: 'absolute', top: '2px', left: autoPilot ? '30px' : '2px',
+              width: '24px', height: '24px', borderRadius: '50%',
+              background: autoPilot ? 'var(--accent-red)' : 'var(--text-muted)',
+              transition: 'all 0.3s', boxShadow: autoPilot ? '0 0 10px var(--accent-red)' : 'none'
+            }} />
+          </button>
+        </div>
+      </div>
+
       {/* Match Selector */}
       <div className="card animate-in animate-in-delay-1" style={{ marginBottom: '32px', padding: '20px' }}>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', overflowX: 'auto', paddingBottom: '8px' }}>
@@ -286,14 +451,21 @@ export default function PredictionsPage() {
           <ProbBar label={`${match.away} Win`} modelProb={match.model1X2.away} bookProb={match.book1X2.away} color="var(--accent-purple)" />
         </div>
 
-        {/* Scoreline Heatmap */}
+        {/* Neural Heatmap */}
         <div className="card animate-in animate-in-delay-3">
-          <div className="card-header">
-            <span className="card-title">📐 AI Scoreline Matrix</span>
-            <span className="stat-badge badge-blue">λ={match.lambda.toFixed(2)} μ={match.mu.toFixed(2)}</span>
-          </div>
-          <ScorelineHeatmap lambda={match.lambda} mu={match.mu} rho={match.rho} />
+          {neuralData ? (
+            <NeuralHeatmap matrix={neuralData.neuralHeatmap} confidence={neuralData.confidence} />
+          ) : (
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--accent-teal)' }}>
+              🧠 Neural Network Processing...
+            </div>
+          )}
         </div>
+      </div>
+      
+      {/* Player Radar Chart */}
+      <div className="animate-in animate-in-delay-3" style={{ marginBottom: '24px' }}>
+        <PlayerRadar homeLineup={homeLineup} awayLineup={awayLineup} homeTeam={match.home} awayTeam={match.away} />
       </div>
 
       {/* Starting Lineups Visualization */}
@@ -335,8 +507,28 @@ export default function PredictionsPage() {
         </div>
       </div>
 
-      <div className="animate-in animate-in-delay-3" style={{ marginBottom: '24px' }}>
-        <LiveSimulator match={match} homeLineup={homeLineup} awayLineup={awayLineup} />
+      {/* The Unified Live Match Center Widgets */}
+      <div className="card animate-in animate-in-delay-3" style={{ marginBottom: '24px', padding: '0', overflow: 'hidden' }}>
+        <div className="card-header" style={{ padding: '16px 20px', background: '#000', borderBottom: '1px solid rgba(255,51,102,0.3)' }}>
+          <span className="card-title">🏟️ INSTITUTIONAL LIVE MATCH CENTER</span>
+          <span className="stat-badge badge-red">LIVE</span>
+        </div>
+        
+        {match.id.startsWith('real_') ? (
+          <div className="grid grid-2" style={{ gap: '0' }}>
+            <div style={{ padding: '20px', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+              <RealMatchTracker fixtureId={match.fixtureId} apiKey="271556db4a4d80ed481770f150fe82a9" />
+            </div>
+            <div style={{ padding: '20px' }}>
+              <MatchStatisticsWidget fixtureId={match.fixtureId} apiKey="271556db4a4d80ed481770f150fe82a9" />
+            </div>
+          </div>
+        ) : (
+          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <p>Live visualization requires a real-time API match.</p>
+            <p style={{ fontSize: '0.8rem', marginTop: '8px' }}>Select a (LIVE) match from the hub above to activate the Match Center.</p>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-2" style={{ marginBottom: '40px' }}>

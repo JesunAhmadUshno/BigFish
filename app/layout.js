@@ -34,6 +34,8 @@ export default function RootLayout({ children }) {
           <div className="nav-links" style={{ display: 'flex', gap: '20px', fontFamily: 'var(--font-display)', fontSize: '0.85rem', fontWeight: 600, letterSpacing: '1px' }}>
             <Link href="/matches" style={{ color: 'var(--accent-gold)', textDecoration: 'none' }}>WORLD CUP HUB</Link>
             <Link href="/predictions" style={{ color: 'var(--accent-teal)', textDecoration: 'none' }}>LIVE MARKETS</Link>
+            <Link href="/tracker" style={{ color: 'var(--accent-green)', textDecoration: 'none' }}>TRACKER</Link>
+            <Link href="/backtest" style={{ color: 'var(--accent-orange)', textDecoration: 'none' }}>BACKTEST</Link>
             <Link href="/agents" style={{ color: 'var(--accent-purple)', textDecoration: 'none' }}>AI AGENTS</Link>
           </div>
         </nav>

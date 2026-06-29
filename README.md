@@ -1,62 +1,78 @@
-# <img src="public/assets/bigfish_logo.png" width="30" height="30" /> BigFish — Autonomous Betting Predictive AI
+# 🦈 BigFish: God-Level Quantitative Sports Betting Terminal
 
-![GitHub License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Next.js](https://img.shields.io/badge/Next.js-16.2-black?logo=next.js)
-![React](https://img.shields.io/badge/React-18-blue?logo=react)
-![Live](https://img.shields.io/badge/Status-Live_Autonomous-brightgreen)
+Welcome to **BigFish**, an institutional-grade, fully autonomous quantitative sports betting terminal built for the 2026 FIFA World Cup and global live soccer markets. 
 
-<img src="public/assets/hero_banner.png" alt="BigFish Hero Banner" width="100%" />
+This is not a traditional spreadsheet or a simple odds scraper. BigFish is a Web3-enabled Hedge Fund Terminal powered by deep learning, cognitive agent swarms, and live in-play data loops.
 
-**BigFish** is a fully autonomous, premium sports betting predictive terminal. It leverages a multi-agent AI architecture to continuously fetch live global football data, execute mathematical Poisson distributions, parse news sentiment, and calculate Expected Value (+EV) to find profitable edges against global sportsbooks.
-
-**🌐 Live Demo:** [https://JesunAhmadUshno.github.io/BigFish](https://JesunAhmadUshno.github.io/BigFish)
+![Hero Banner](public/assets/hero_banner.png)
 
 ---
 
-## ⚡ Core Autonomous Agents
+## 🧠 The V11.0 Neural Swarm Architecture
 
-### 1. 🧠 Dixon-Coles Predictive Engine
-The core mathematical backbone of BigFish. This agent calculates Expected Goals (xG) by modeling the attack strength and defense vulnerability of every team based on historical Elo ratings. It applies a Poisson distribution to predict exact scorelines, factoring in the low-scoring nature of football ($\rho$ correlation).
+BigFish has evolved into a "God-Level" autonomous trading ecosystem. Here is how the engine works:
 
-### 2. 📰 NLP Sentiment Agent
-An autonomous natural language processing agent that continuously scans for external variables. It analyzes weather (WBGT), extreme altitude changes, team morale, and critical player injuries, adjusting the mathematical xG output with an Environmental Multiplier.
+### 1. The Deep Learning Engine (TensorFlow.js)
+At the core of BigFish is a non-linear Sequential Neural Network running directly in the browser via `@tensorflow/tfjs`.
+- It processes an 8-feature tensor (Elo ratings, expected goals, rest days, weather severity, and motivation).
+- **The Quant Backtester:** The `/backtest` module runs thousands of Monte Carlo simulations and calls `model.fit()` to train the weights, visualizing the loss gradient in real-time. The trained memory is stored in `IndexedDB`.
 
-### 3. 💰 Kelly Criterion Risk Manager
-The financial brain of BigFish. It continuously monitors the live bookmaker odds and compares them against the AI's true probabilities to find Expected Value (+EV). It strictly dictates stake sizing using Fractional Kelly formulas to maximize bankroll growth while minimizing the risk of ruin.
+### 2. The Cognitive Agent Swarm (LLM Orchestrator)
+Before the deep learning model fires, the **Swarm Orchestrator** dispatches specialized AI agents:
+- **The Sentiment Agent:** Scrapes real-time headlines and runs NLP heuristic analysis to identify morale, injuries, and suspensions, generating a "Motivation Delta".
+- **The Tactical Agent:** Analyzes the formations and manager styles to calculate expected goals (xG) multipliers.
 
-### 4. ⏱️ Live Monte Carlo Simulator
-Runs real-time simulations during active matches. By consuming live match time and current scores, this agent recalculates the remaining Expected Goals using linear time-decay, updating the win probabilities second-by-second.
+### 3. The Live In-Play Feedback Loop
+BigFish does not rely on static pre-match data. It is a live trading terminal.
+- We pull real-time JSON statistics (possession %, red cards, dangerous attacks) from `api-sports.io` every 30 seconds.
+- As the live game unfolds, these real-time stats are fed back into the Swarm Orchestrator and Deep Learning Engine.
+- The **Neural Heatmap** and **Win Probabilities** literally recalculate and shift on your screen as the match progresses.
+
+### 4. True Web3 Autonomous Execution
+The Auto-Pilot is not a mockup. BigFish integrates `ethers.js` to serve as a decentralized execution agent.
+- Connect your MetaMask wallet.
+- Set your Kelly Criterion fraction.
+- The AI will automatically sign smart-contract transactions to decentralized ledgers (like Polymarket/Azuro) to deploy capital the moment it detects a +EV arbitrage edge.
 
 ---
 
-## 🌍 Global API Integrations
+## 🖥️ The Command Center Modules
 
-BigFish operates 100% autonomously by continuously polling data from the global internet without requiring a backend server. 
-
-- **[WorldCup26.ir](https://worldcup26.ir/)**: Fetches the official, free 2026 FIFA World Cup schedules, group standings, stadiums, and live match scores.
-- **[The Odds API](https://the-odds-api.com/)**: Connects to global sportsbooks to pull real-time, live betting markets for Expected Value (+EV) comparison.
+- **🌍 World Cup Hub (`/matches`):** A beautiful grid tracking the 2026 FIFA World Cup groups and dynamic Elo ratings.
+- **⚡ Live Markets (`/predictions`):** The institutional Match Center. Features live API-Football pitch trackers, real-time match statistics, high-def tactical Player Radar charts, and the live Neural Heatmap.
+- **📊 The Tracker (`/tracker`):** Your Hedge Fund Ledger. Tracks active capital exposure, closed P&L, and yield metrics.
+- **🔬 Quant Backtester (`/backtest`):** Simulate historical data and train the neural network before deploying real capital.
 
 ---
 
-## 🚀 Deployment (GitHub Pages)
+## 🚀 Installation & Deployment
 
-BigFish is designed to be hosted 100% free and autonomously on **GitHub Pages**. The repository includes a GitHub Action workflow that automatically builds the Next.js static export and pushes it to the internet whenever you push code.
+BigFish is built on **Next.js 16 (App Router)** and exported as a fully static web application.
 
-### Local Development
-\`\`\`bash
+```bash
 # Install dependencies
 npm install
 
-# Add your Odds API Key
-echo "ODDS_API_KEY=your_key_here" > .env.local
-
-# Start the dev server
+# Run local development server
 npm run dev
-\`\`\`
+
+# Export to static HTML for GitHub Pages / IPFS
+npm run build
+```
+
+### Environment Variables
+To unlock the full potential of BigFish, add your API keys to a `.env.local` file:
+```env
+# Required for Live Pitch & Real-time Stats
+NEXT_PUBLIC_API_SPORTS_KEY=your_key_here
+
+# Required for Live Global Odds
+NEXT_PUBLIC_ODDS_API_KEY=your_key_here
+
+# (Optional) For True LLM Sentiment Scraping
+NEXT_PUBLIC_LLM_KEY=your_gemini_or_openai_key
+```
 
 ---
 
-## 🤝 Contributing
-Built by Jesun & Ushno. Pull requests are welcome for algorithm optimizations or new UI dashboard features.
-
-**License:** MIT
+*Disclaimer: BigFish is an experimental algorithmic trading project. The autonomous Web3 execution module deploys real capital. Run the Backtester and understand the variance before engaging the Auto-Pilot.*
