@@ -13,14 +13,14 @@ This is not a traditional spreadsheet or a simple odds scraper. BigFish is a Web
 
 ---
 
-## 🧠 The V11.0 Neural Swarm Architecture
+## 🧠 The V14.0 Neural Swarm Architecture
 
 BigFish has evolved into a "God-Level" autonomous trading ecosystem. Here is how the engine works:
 
 ```mermaid
 graph TD
-    A[Live API-Sports Data Feed] -->|Possession, Red Cards| B(Swarm Orchestrator)
-    C[News/Twitter NLP Scraper] -->|Sentiment Analysis| B
+    A[TheSportsDB/SoFIFA API] -->|Tactics, Real Match History| B(Swarm Orchestrator)
+    C[Live API-Sports Data Feed] -->|Possession, Red Cards| B
     B -->|Generates Feature Tensor| D{TensorFlow.js Deep Learning}
     D -->|Probability Distribution| E[Neural Heatmap & EV Calculator]
     E -->|If EV > 0| F((Web3 Execution Agent))
@@ -32,19 +32,18 @@ graph TD
 
 ### 1. The Deep Learning Engine (TensorFlow.js)
 At the core of BigFish is a non-linear Sequential Neural Network running directly in the browser via `@tensorflow/tfjs`.
-- It processes an 8-feature tensor (Elo ratings, expected goals, rest days, weather severity, and motivation).
-- **The Quant Backtester:** The `/backtest` module runs thousands of Monte Carlo simulations and calls `model.fit()` to train the weights, visualizing the loss gradient in real-time. The trained memory is stored in `IndexedDB`.
+- It processes a dense feature tensor.
+- **The God-Mode Data Engine:** The `/backtest` module now pulls **REAL 100 historical Premier League matches** from TheSportsDB API, training the `model.fit()` over true, real-world data instead of simulations. The trained memory is stored in `IndexedDB`.
 
-### 2. The Cognitive Agent Swarm (LLM Orchestrator)
+### 2. The Cognitive Agent Swarm & SoFIFA Tactical Engine
 Before the deep learning model fires, the **Swarm Orchestrator** dispatches specialized AI agents:
+- **The Tactical Agent (SoFIFA Engine):** Fetches hyper-granular EA Sports FIFA data (Pace, Physicality, Attack, Defense) via custom API clients to dynamically calculate exact expected goals (xG) multipliers based on true team metrics.
 - **The Sentiment Agent:** Scrapes real-time headlines and runs NLP heuristic analysis to identify morale, injuries, and suspensions, generating a "Motivation Delta".
-- **The Tactical Agent:** Analyzes the formations and manager styles to calculate expected goals (xG) multipliers.
 
-### 3. The Live In-Play Feedback Loop
+### 3. The Live In-Play Feedback Loop & Custom 3D Match Tracker
 BigFish does not rely on static pre-match data. It is a live trading terminal.
 - We pull real-time JSON statistics (possession %, red cards, dangerous attacks) from `api-sports.io` every 30 seconds.
-- As the live game unfolds, these real-time stats are fed back into the Swarm Orchestrator and Deep Learning Engine.
-- The **Neural Heatmap** and **Win Probabilities** literally recalculate and shift on your screen as the match progresses.
+- **Bespoke 3D Isometric Pitch Tracker:** Built entirely from scratch using cutting-edge CSS 3D transforms (`rotateX(60deg)`), SVGs, and cubic-bezier animations, BigFish visualizes the live match momentum with a stunning 3D floating ball and "Bet365-style" action ring overlay.
 
 ### 4. True Web3 Autonomous Execution
 The Auto-Pilot is not a mockup. BigFish integrates `ethers.js` to serve as a decentralized execution agent.
@@ -57,7 +56,7 @@ The Auto-Pilot is not a mockup. BigFish integrates `ethers.js` to serve as a dec
 ## 🖥️ The Command Center Modules
 
 - **🌍 World Cup Hub (`/matches`):** A beautiful grid tracking the 2026 FIFA World Cup groups and dynamic Elo ratings.
-- **⚡ Live Markets (`/predictions`):** The institutional Match Center. Features live API-Football pitch trackers, real-time match statistics, high-def tactical Player Radar charts, and the live Neural Heatmap.
+- **⚡ Live Markets (`/predictions`):** The institutional Match Center. Features the custom 3D Match Tracker, real-time match statistics, high-def SoFIFA Tactical Radar charts, and the live Neural Heatmap.
 - **📊 The Tracker (`/tracker`):** Your Hedge Fund Ledger. Tracks active capital exposure, closed P&L, and yield metrics.
 - **🔬 Quant Backtester (`/backtest`):** Simulate historical data and train the neural network before deploying real capital.
 

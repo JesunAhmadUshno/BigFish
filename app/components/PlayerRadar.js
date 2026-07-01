@@ -1,5 +1,8 @@
 'use client';
 
+import { Radar } from 'react-chartjs-2';
+import { useEffect, useState } from 'react';
+import { fetchSquadTactics } from '../../lib/sofifa-api';
 import {
   Chart as ChartJS,
   RadialLinearScale,
@@ -9,51 +12,48 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Radar } from 'react-chartjs-2';
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
-export default function PlayerRadar({ homeLineup, awayLineup, homeTeam, awayTeam }) {
-  // Aggregate mock tactical metrics for the starting lineups
-  const homeStats = { attack: 0, defense: 0, possession: 0, pressing: 0, creativity: 0, stamina: 0 };
-  const awayStats = { attack: 0, defense: 0, possession: 0, pressing: 0, creativity: 0, stamina: 0 };
+export default function PlayerRadar({ homeTeam, awayTeam }) {
+  const [tactics, setTactics] = useState(null);
 
-  // Generate pseudo-stats based on xG weights for the visualizer
-  const agg = (lineup, stats) => {
-    lineup.forEach(p => {
-      stats.attack += p.xgWeight * 20;
-      stats.creativity += p.xgWeight * 15;
-      stats.possession += 10;
-      stats.defense += (2 - p.xgWeight) * 10;
-      stats.pressing += 12;
-      stats.stamina += 15;
-    });
-  };
+  useEffect(() => {
+    async function getTactics() {
+      const homeT = await fetchSquadTactics(homeTeam);
+      const awayT = await fetchSquadTactics(awayTeam);
+      
+      if (homeT && awayT) {
+        setTactics({ home: homeT.tactics, away: awayT.tactics });
+      }
+    }
+    if (homeTeam && awayTeam) {
+      getTactics();
+    }
+  }, [homeTeam, awayTeam]);
 
-  agg(homeLineup.slice(0, 11), homeStats);
-  agg(awayLineup.slice(0, 11), awayStats);
+  if (!tactics) {
+    return <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>Loading SoFIFA Database...</div>;
+  }
 
-  // Normalize 0-100
-  const norm = (val) => Math.min(100, Math.max(40, val / 11));
-  
   const data = {
-    labels: ['Attacking', 'Creativity', 'Possession', 'Defensive Solidity', 'Pressing Intensity', 'Physicality'],
+    labels: ['Attack', 'Midfield', 'Defense', 'Physicality', 'Pressing'],
     datasets: [
       {
         label: homeTeam,
-        data: [norm(homeStats.attack), norm(homeStats.creativity), norm(homeStats.possession), norm(homeStats.defense), norm(homeStats.pressing), norm(homeStats.stamina)],
-        backgroundColor: 'rgba(0, 255, 204, 0.2)', // Teal
+        data: [tactics.home.attack, tactics.home.midfield, tactics.home.defense, tactics.home.physicality, tactics.home.pressing],
+        backgroundColor: 'rgba(0, 255, 204, 0.2)',
         borderColor: 'rgba(0, 255, 204, 1)',
         borderWidth: 2,
         pointBackgroundColor: 'rgba(0, 255, 204, 1)',
       },
       {
         label: awayTeam,
-        data: [norm(awayStats.attack), norm(awayStats.creativity), norm(awayStats.possession), norm(awayStats.defense), norm(awayStats.pressing), norm(awayStats.stamina)],
-        backgroundColor: 'rgba(157, 78, 221, 0.2)', // Purple
-        borderColor: 'rgba(157, 78, 221, 1)',
+        data: [tactics.away.attack, tactics.away.midfield, tactics.away.defense, tactics.away.physicality, tactics.away.pressing],
+        backgroundColor: 'rgba(255, 51, 102, 0.2)',
+        borderColor: 'rgba(255, 51, 102, 1)',
         borderWidth: 2,
-        pointBackgroundColor: 'rgba(157, 78, 221, 1)',
+        pointBackgroundColor: 'rgba(255, 51, 102, 1)',
       },
     ],
   };
@@ -80,7 +80,7 @@ export default function PlayerRadar({ homeLineup, awayLineup, homeTeam, awayTeam
     <div className="card animate-in" style={{ padding: '20px', height: '350px' }}>
       <div className="card-header" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '16px' }}>
         <span className="card-title">📡 Tactical Matchup Matrix</span>
-        <span className="stat-badge badge-blue">SWARM VISION</span>
+        <span className="stat-badge badge-blue">SoFIFA VISION</span>
       </div>
       <div style={{ height: '250px', position: 'relative' }}>
         <Radar data={data} options={options} />

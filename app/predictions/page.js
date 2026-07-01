@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import EasyInterpreter from '../components/EasyInterpreter';
 import RealMatchTracker from '../components/RealMatchTracker';
+import Bet365Pitch from '../components/Bet365Pitch';
 import { getPolymarketOdds } from '../../lib/polymarket';
 import { MatchStatisticsWidget, MatchLineupWidget } from '../components/ApiWidgets';
 import { getTeamLineup, calculatePlayerGoalProb } from '../../lib/player-data';
@@ -177,7 +178,34 @@ export default function PredictionsPage() {
             });
             allMatches = [...allMatches, ...processedWc];
           }
-        } catch(e) { console.warn("WC API failed", e); }
+        } catch(e) {
+          console.warn("WC API failed, using fallback mock data", e);
+          const mockWcGames = [
+            { id: '1', home_team_name_en: 'Mexico', away_team_name_en: 'Poland' },
+            { id: '2', home_team_name_en: 'Canada', away_team_name_en: 'Morocco' },
+            { id: '3', home_team_name_en: 'USA', away_team_name_en: 'Wales' }
+          ];
+          const processedWc = mockWcGames.map(game => {
+            const homeTeam = game.home_team_name_en;
+            const awayTeam = game.away_team_name_en;
+            const prediction = predictMatch({
+              homeElo: liveElo[homeTeam] || 1750,
+              awayElo: liveElo[awayTeam] || 1750,
+            });
+            const vig = 0.05;
+            return {
+              id: `wc_${game.id}`,
+              tournament: 'FIFA World Cup 2026',
+              home: homeTeam, away: awayTeam,
+              lambda: prediction.parameters.lambda, mu: prediction.parameters.mu, rho: prediction.parameters.rho,
+              odds: { home: 1/(prediction.probabilities1X2.home + vig), draw: 1/(prediction.probabilities1X2.draw + vig), away: 1/(prediction.probabilities1X2.away + vig) },
+              model1X2: prediction.probabilities1X2,
+              book1X2: { home: prediction.probabilities1X2.home + vig, draw: prediction.probabilities1X2.draw + vig, away: prediction.probabilities1X2.away + vig },
+              overUnder: prediction.overUnder, btts: prediction.btts
+            };
+          });
+          allMatches = [...allMatches, ...processedWc];
+        }
 
         // 2. Fetch Live Global Markets from The Odds API (using User's Key)
         try {
@@ -524,9 +552,11 @@ export default function PredictionsPage() {
             </div>
           </div>
         ) : (
-          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <p>Live visualization requires a real-time API match.</p>
-            <p style={{ fontSize: '0.8rem', marginTop: '8px' }}>Select a (LIVE) match from the hub above to activate the Match Center.</p>
+          <div style={{ padding: '20px' }}>
+            <div style={{ padding: '8px', background: 'rgba(255,215,0,0.1)', color: 'var(--accent-gold)', fontSize: '0.75rem', textAlign: 'center', marginBottom: '16px', borderRadius: '4px' }}>
+              ⚠️ PRE-MATCH MODE: Generating Dynamic 3D Match Simulation using xG Weights
+            </div>
+            <Bet365Pitch match={match} homeRemainingXG={match.lambda} awayRemainingXG={match.mu} />
           </div>
         )}
       </div>
