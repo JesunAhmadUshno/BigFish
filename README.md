@@ -13,6 +13,31 @@ This is not a traditional spreadsheet or a simple odds scraper. BigFish is a Web
 
 ---
 
+## Start here
+
+1. Open the live app: https://jesunahmadushno.github.io/BigFish/
+2. Open the Quant Backtester (`/backtest`). Train the model on real
+   historical matches before you read any prediction.
+3. Open Live Markets (`/predictions`) for the match center, and the
+   Tracker (`/tracker`) for exposure and closed results.
+4. Run it from source: `npm install`, then `npm run dev` (Next.js).
+
+## Results, on the record
+
+This repo holds no paper record of betting returns, so this table makes
+no return claims. It records method and sample only. The return rows stay
+empty until a dated, exportable record exists behind them.
+
+| Date | Run | Method | Sample | Result |
+| :--- | :--- | :--- | :--- | :--- |
+| TBD-NO-RECORD | Backtest | Neural model trained in the browser with TensorFlow.js (`model.fit`), weights stored in IndexedDB | 100 historical Premier League matches pulled from TheSportsDB | TBD-NO-RECORD |
+| TBD-NO-RECORD | Live loop | In-play stats pulled every 30 seconds, EV filter, Kelly sizing | TBD-NO-RECORD | TBD-NO-RECORD |
+
+Receipts from the tree: 8 app routes (matches, predictions, backtest,
+tracker, bankroll, agents, analytics, home) and 20 modules under `lib/`
+(Elo updater, Dixon-Coles, Monte Carlo, copula, de-vig engine, EV
+calculator, Kelly criterion, neural engine, execution agent, and more).
+
 ## 🧠 The V14.0 Neural Swarm Architecture
 
 BigFish has evolved into a "God-Level" autonomous trading ecosystem. Here is how the engine works:
