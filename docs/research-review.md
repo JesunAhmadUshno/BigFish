@@ -34,7 +34,7 @@ BigFish is a well-organised set of textbook betting models wired into a polished
 9. **Unsourced constants (labelled on this branch).** `TEAM_ELO` has no source or snapshot date; `PHYSIO_CONSTANTS` and `SGP_TYPICAL_HOUSE_EDGE` have no citation. Comments now say so instead of inventing sources.
 10. **Elo goal-difference weight.** `lib/elo-updater.js` calls its multiplier "FIFA standard". It gives 2.0 for a three-goal margin; the World Football Elo Ratings rule gives (11 + N) / 8 = 1.75. Worth either citing a source or aligning.
 11. **Overclaiming language.** "Institutional-grade", "God-Level" and "hyper-accurate" in the README are not supported by any measured result. Left for the owner to reword; the dashboard does not repeat them as claims.
-12. **Hygiene.** The TheSportsDB key was hardcoded in `lib/thesportsdb.js`; it now reads `NEXT_PUBLIC_THESPORTSDB_KEY` with the public free-tier fallback. The old key remains in git history, so rotating it is the owner's call. `files.zip` duplicates `files/`; `AGENTS.md`/`CLAUDE.md` scaffolding is committed. Both left in place (not created on this branch).
+12. **Hygiene.** The TheSportsDB key was hardcoded in `lib/thesportsdb.js`; it now reads `NEXT_PUBLIC_THESPORTSDB_KEY` with the public free-tier fallback. The old key remains in git history, so rotating it is the owner's call. `files.zip` duplicates `files/`; editor-instruction scaffolding files are committed at the repo root. Both left in place (not created on this branch).
 
 ## Fixed on this branch (cheap upgrades)
 
