@@ -50,6 +50,16 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
+      # Live dashboard (site/): built after the app and copied to out/lab, so it is served at
+      # /BigFish/lab/ while the product keeps /BigFish/. One workflow deploys both.
+      - name: Install dashboard dependencies
+        run: npm ci
+        working-directory: site
+      - name: Build dashboard (runs the known-answer check first)
+        run: npm run build
+        working-directory: site
+      - name: Add dashboard to the Pages artifact
+        run: mkdir -p out/lab && cp -r site/dist/. out/lab/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
