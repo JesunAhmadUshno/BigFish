@@ -11,6 +11,8 @@ This is not a traditional spreadsheet or a simple odds scraper. BigFish is a Web
 
 ![Hero Banner](public/assets/hero_banner.png)
 
+Live dashboard: https://jesunahmadushno.github.io/BigFish/lab/ (the model code running in your browser, plus a claims audit and the [research review](docs/research-review.md)).
+
 ---
 
 ## Start here
@@ -71,10 +73,10 @@ BigFish does not rely on static pre-match data. It is a live trading terminal.
 - **Bespoke 3D Isometric Pitch Tracker:** Built entirely from scratch using cutting-edge CSS 3D transforms (`rotateX(60deg)`), SVGs, and cubic-bezier animations, BigFish visualizes the live match momentum with a stunning 3D floating ball and "Bet365-style" action ring overlay.
 
 ### 4. True Web3 Autonomous Execution
-The Auto-Pilot is not a mockup. BigFish integrates `ethers.js` to serve as a decentralized execution agent.
+The Auto-Pilot is a prototype. BigFish integrates `ethers.js` to connect a wallet, but no transaction is built or sent yet: confirmations in the execution log are simulated.
 - Connect your MetaMask wallet.
 - Set your Kelly Criterion fraction.
-- The AI will automatically sign smart-contract transactions to decentralized ledgers (like Polymarket/Azuro) to deploy capital the moment it detects a +EV arbitrage edge.
+- Planned: the AI will automatically sign smart-contract transactions to decentralized ledgers (like Polymarket/Azuro) to deploy capital the moment it detects a +EV arbitrage edge.
 
 ---
 
@@ -120,4 +122,4 @@ NEXT_PUBLIC_LLM_KEY=your_gemini_or_openai_key
 
 ---
 
-*Disclaimer: BigFish is an experimental algorithmic trading project. The autonomous Web3 execution module deploys real capital. Run the Backtester and understand the variance before engaging the Auto-Pilot.*
+*Disclaimer: BigFish is an experimental algorithmic trading project. The autonomous Web3 execution module is designed to deploy real capital, but today it only simulates execution. Run the Backtester and understand the variance before engaging the Auto-Pilot.*
