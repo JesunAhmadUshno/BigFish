@@ -111,6 +111,9 @@ NEXT_PUBLIC_API_SPORTS_KEY=your_key_here
 # Required for Live Global Odds
 NEXT_PUBLIC_ODDS_API_KEY=your_key_here
 
+# (Optional) TheSportsDB key for the backtester; falls back to the free key '3'
+NEXT_PUBLIC_THESPORTSDB_KEY=your_key_here
+
 # (Optional) For True LLM Sentiment Scraping
 NEXT_PUBLIC_LLM_KEY=your_gemini_or_openai_key
 ```
