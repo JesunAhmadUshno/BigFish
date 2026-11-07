@@ -1,0 +1,5 @@
+/* Additions on top of the Lab OS base (styles.css is kept verbatim from the reference build). */
+.tiles.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.tiles.five .num { font-size: 36px; }
+@media (max-width: 760px) { .tiles.five { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+td { vertical-align: top; }
