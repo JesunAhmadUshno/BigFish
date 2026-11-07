@@ -18,7 +18,10 @@ import { predictWithDeepLearning } from '../../lib/neural-engine';
 import { Orchestrator } from '../../lib/swarm-orchestrator';
 
 // ─── Constants ──────────────────────────────────────────
-const ODDS_API_KEY = 'be0f7c5a5d221ed93cad247719623ffa';
+// Keys come from the build environment (see .env.example). This page is statically exported,
+// so a key set here ships to every visitor: leave them unset for public builds.
+const ODDS_API_KEY = process.env.NEXT_PUBLIC_ODDS_API_KEY || '';
+const API_SPORTS_KEY = process.env.NEXT_PUBLIC_API_SPORTS_KEY || '';
 
 // ─── Scoreline Probability Heatmap (Dixon-Coles Corrected) ──────
 function ScorelineHeatmap({ lambda, mu, rho }) {
@@ -208,7 +211,7 @@ export default function PredictionsPage() {
         }
 
         // 2. Fetch Live Global Markets from The Odds API (using User's Key)
-        try {
+        if (ODDS_API_KEY) try {
           // 'upcoming' gets the next 8 matches across global leagues
           const oddsRes = await fetch(`https://api.the-odds-api.com/v4/sports/upcoming/odds/?apiKey=${ODDS_API_KEY}&regions=eu&markets=h2h&oddsFormat=decimal`);
           if (oddsRes.ok) {
@@ -244,9 +247,9 @@ export default function PredictionsPage() {
         } catch(e) { console.warn("Odds API failed", e); }
 
         // 3. Fetch REAL Live Matches from API-Sports for the Live Tracker Widget
-        try {
+        if (API_SPORTS_KEY) try {
           const apiSportsRes = await fetch('https://v3.football.api-sports.io/fixtures?live=all', {
-            headers: { 'x-apisports-key': '271556db4a4d80ed481770f150fe82a9' }
+            headers: { 'x-apisports-key': API_SPORTS_KEY }
           });
           if (apiSportsRes.ok) {
             const apiSportsData = await apiSportsRes.json();
@@ -308,7 +311,7 @@ export default function PredictionsPage() {
         if (match.id.startsWith('real_')) {
            try {
              const statsRes = await fetch(`https://v3.football.api-sports.io/fixtures/statistics?fixture=${match.fixtureId}`, {
-               headers: { 'x-apisports-key': '271556db4a4d80ed481770f150fe82a9' }
+               headers: { 'x-apisports-key': API_SPORTS_KEY }
              });
              if (statsRes.ok) {
                const data = await statsRes.json();
@@ -545,10 +548,10 @@ export default function PredictionsPage() {
         {match.id.startsWith('real_') ? (
           <div className="grid grid-2" style={{ gap: '0' }}>
             <div style={{ padding: '20px', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-              <RealMatchTracker fixtureId={match.fixtureId} apiKey="271556db4a4d80ed481770f150fe82a9" />
+              <RealMatchTracker fixtureId={match.fixtureId} apiKey={API_SPORTS_KEY} />
             </div>
             <div style={{ padding: '20px' }}>
-              <MatchStatisticsWidget fixtureId={match.fixtureId} apiKey="271556db4a4d80ed481770f150fe82a9" />
+              <MatchStatisticsWidget fixtureId={match.fixtureId} apiKey={API_SPORTS_KEY} />
             </div>
           </div>
         ) : (
