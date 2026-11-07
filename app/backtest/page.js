@@ -48,6 +48,7 @@ export default function BacktestPage() {
     }
     
     // Train the model
+    let finalMetrics = null;
     await trainModel(historicalData, (epoch, loss, acc) => {
       setEpochs(epoch + 1);
       setLossData(prev => [...prev, { x: epoch, y: loss }]);
@@ -60,10 +61,12 @@ export default function BacktestPage() {
     // Generate Monte Carlo simulation results
     setSimResults({
       totalSims: 1000,
-      winRate: (accData.length > 0 ? accData[accData.length - 1].y * 100 : 54.2).toFixed(1),
-      maxDrawdown: '$1,240.00',
-      sharpeRatio: 1.84,
-      projectedROI: '14.2%',
+      // Training-set accuracy only (no hold-out split). Sharpe, ROI and drawdown are
+      // not computed anywhere in this app, so they are shown as "not computed".
+      winRate: finalMetrics ? (finalMetrics.acc * 100).toFixed(1) : 'n/a',
+      maxDrawdown: 'not computed',
+      sharpeRatio: 'not computed',
+      projectedROI: 'not computed',
       datasetSize: historicalData.length
     });
   };
@@ -140,14 +143,14 @@ export default function BacktestPage() {
         <div className="card">
           <div className="card-header">
             <span className="card-title">📊 Simulation Results</span>
-            {simResults && <span className="stat-badge badge-green">VERIFIED</span>}
+            {simResults && <span className="stat-badge">TRAINING SET ONLY</span>}
           </div>
           
           {simResults ? (
             <div className="grid grid-2" style={{ gap: '16px', textAlign: 'center' }}>
               <div style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Simulated Win Rate</div>
-                <div style={{ fontSize: '1.8rem', fontFamily: 'var(--font-mono)', color: 'var(--accent-teal)' }}>{simResults.winRate}%</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Training Accuracy (no hold-out)</div>
+                <div style={{ fontSize: '1.8rem', fontFamily: 'var(--font-mono)', color: 'var(--accent-teal)' }}>{simResults.winRate}{simResults.winRate === 'n/a' ? '' : '%'}</div>
               </div>
               <div style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Sharpe Ratio</div>
