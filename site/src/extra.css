@@ -1,3 +1,5 @@
+/* Hallmark · v2.0.0 · Batch 4 rollout 2026-11-16 · Archetype B tool dashboard: tokens, labels, focus and motion standardised; data, copy and structure preserved */
+/* Hallmark · pre-emit critique: P3 H4 E4 S4 R5 V3 · weakest: V, one of the Lab OS dashboards on a shared house pattern; this pass adds the money links and the chat widget and brings the CSS to the floor only */
 /* Additions on top of the Lab OS base (styles.css is kept verbatim from the reference build). */
 .tiles.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .tiles.five .num { font-size: 36px; }
