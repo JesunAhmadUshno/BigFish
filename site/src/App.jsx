@@ -105,7 +105,7 @@ export default function App() {
   const [match, setMatch] = useState({ home: 'Argentina', away: 'France', rho: DIXON_COLES_DEFAULTS.RHO_INITIAL, ha: DIXON_COLES_DEFAULTS.HOME_ADVANTAGE, neutral: false });
   const pred = useMemo(() => predictMatch({ homeElo: TEAM_ELO[match.home], awayElo: TEAM_ELO[match.away], rho: match.rho, homeAdvantage: match.neutral ? 0 : match.ha }), [match]);
   return (
-    <div className="wrap">
+    <div className="wrap"><a className="skip" href="#top">Skip to content</a>
       <MenuBar />
       <div className="glow" aria-hidden="true" />
       <Hero />
@@ -120,14 +120,14 @@ export default function App() {
       <Dock />
       <footer>
         Not betting advice. BigFish has no recorded betting returns. Every number on this page is computed in your browser by the repo’s own <code>lib/</code> code or read from repo files at build time.
-      </footer>
+      <nav className="support" aria-label="Support this work"><a href="https://github.com/sponsors/JesunAhmadUshno">Sponsor this work</a><a href="https://github.com/sponsors/JesunAhmadUshno">Donate</a><a href="https://buymeacoffee.com/jesun">Buy Me a Coffee</a><a href="https://calendly.com/jesunahmadushno/30min">Work with me</a></nav></footer>
     </div>
   );
 }
 
 function Hero() {
   return (
-    <header className="card hero window" id="top" data-title="BigFish — README">
+    <header className="card hero window" id="top" data-title="BigFish - README">
       <div className="head">
         <p className="eyebrow">2026 World Cup model · live code, no track record</p>
         <span className="pill warn">● {facts.recordedResults} recorded results</span>
@@ -203,7 +203,7 @@ function Predictor({ match, setMatch, pred }) {
   const mass = pred.matrix.flat().reduce((a, b) => a + b, 0);
   const same = match.home === match.away;
   return (
-    <section id="predictor" className="card window reveal" data-title="dixon_coles.js — match predictor">
+    <section id="predictor" className="card window reveal" data-title="dixon_coles.js - match predictor">
       <div className="head">
         <div>
           <p className="eyebrow">Live · lib/dixon-coles.js</p>
@@ -274,7 +274,7 @@ function MonteCarlo({ match, pred }) {
   const keys = [['home', 'var(--primary)'], ['draw', 'var(--warn)'], ['away', 'var(--bad)']];
   const last = res?.series.at(-1);
   return (
-    <section id="montecarlo" className="card window reveal" data-title="monte_carlo.js — 10k sims">
+    <section id="montecarlo" className="card window reveal" data-title="monte_carlo.js - 10k sims">
       <div className="head">
         <div>
           <p className="eyebrow">Live · lib/monte-carlo.js against the exact matrix</p>
@@ -490,7 +490,7 @@ function Venues() {
   const y = (e) => pad.t + (1 - (Math.max(ymin, e) - ymin) / (1 - ymin)) * (H - pad.t - pad.b);
   const series = [['efficiency', 'Composite', 'var(--text)', 2.5], ['hypoxicFactor', 'Altitude', 'var(--primary)', 1.5], ['thermalFactor', 'Heat', 'var(--bad)', 1.5], ['circadianFactor', 'Jet lag', 'var(--warn)', 1.5]];
   return (
-    <section id="venues" className="card window reveal" data-title="physiometric_agent — venues">
+    <section id="venues" className="card window reveal" data-title="physiometric_agent - venues">
       <div className="head">
         <div>
           <p className="eyebrow">Live · lib/physiometric-agent.js · unsourced assumptions</p>
@@ -593,7 +593,7 @@ function Reproduce() {
     ['test/lib.smoke.test.mjs', 'Smoke tests', 'npm test, built-in runner'],
   ];
   return (
-    <section id="reproduce" className="card window reveal" data-title="Terminal — npm run build">
+    <section id="reproduce" className="card window reveal" data-title="Terminal - npm run build">
       <p className="eyebrow">Reproduce it</p>
       <h2>Two commands: one for the app, one for this page.</h2>
       <ol className="steps" style={{ marginTop: 16 }}>
